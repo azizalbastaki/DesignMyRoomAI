@@ -2,7 +2,7 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.gui.DirectGui import *
 import google.generativeai as genai
-
+import os
 
 def getAPIKey():
     file = open("api_key.txt", 'r')
@@ -24,6 +24,7 @@ class MyApp(ShowBase):
             "p": False,
             "l": False
         }
+
 
         self.assetsLoaded = []
 
@@ -58,11 +59,18 @@ class MyApp(ShowBase):
     def designRoom(self, textEntered):
         print(textEntered)
         self.assetsLoaded = []
+        self.promptEngineered(textEntered)
         return
 
     def promptEngineered(self, textEntered):
-        print(textEntered)
+        modelsAvailable = str(os.listdir("assets/furniture"))
+
+        prompt = "You will receive a description of a room. The response you provide will be used to load several 3D models into a 3D cartesian space. You must provide a list of models that would be loaded, alongside several properties such as color, size, position (z up), and rotation (heading, pitch, roll). The files available are: " + modelsAvailable + ". Please provide a in the following format: [{filename} {posX} {posY} {posZ} {heading} {pitch}, {roll} {color_red - 0 to 1} {color_blue - 0 to 1} {color_green - 0 to 1} {color_alpha - 0 to 1} {scale}], each object in its own line. So for example, ({books.glb}{0}{0}{0}{90}{20}{0}{1}{0}{0.5}{0.4}{1}). Please ensure that walls and floorings are also specified,  The input is as follows: "
+        response = self.model.generate_content(prompt + textEntered)
+        print(response.text)
         return
+
+
 
 app = MyApp()
 app.run()
