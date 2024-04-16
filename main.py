@@ -1,5 +1,6 @@
 # import panda3d
 from direct.showbase.ShowBase import ShowBase
+from panda3d.core import DirectionalLight
 from direct.gui.DirectGui import *
 import google.generativeai as genai
 import os
@@ -47,9 +48,15 @@ class MyApp(ShowBase):
         self.accept("l-up", self.updateKey, ["l", False])
 
         self.entrybox = DirectEntry(text="", scale=0.05, command=self.designRoom,
-                            initialText="Describe the room", numLines=30, width = 15,cursorKeys = 1, focus=1
-                                    , parent=base.a2dTopLeft, pos=(0.01, 0, -0.3))
-        render.setShaderAuto()
+                            initialText="Describe a standard living room", numLines=30, width = 15,cursorKeys = 1, focus=1
+                                    , parent=base.a2dTopLeft, pos=(0.01, 0, -0.3), text_fg = (1,1,1,1))
+        self.entrybox.setColor(0.1,0.1,0.1,0.7)
+        self.entrybox.set
+        dlight = DirectionalLight('dlight')
+        dlight.setColor((0.8, 0.8, 0.5, 1))
+        dlnp = render.attachNewNode(dlight)
+        dlnp.setHpr(0, -60, 0)
+        render.setLight(dlnp)
         self.taskMgr.add(self.update, "update")
     def updateKey(self, key, value):
         self.keyMap[key] = value
@@ -69,19 +76,17 @@ class MyApp(ShowBase):
             newModel = loader.loadModel("assets/furniture/" + objectList[obj][0])
             self.assetsLoaded.append(newModel)
             newModel.reparentTo(render)
-            newModel.setPos(float(finalPropertyList[1]), float(finalPropertyList[2]), float(finalPropertyList[3]))
-            newModel.setHpr(float(finalPropertyList[4]), float(finalPropertyList[5]), float(finalPropertyList[6]))
-            newModel.setColor(float(finalPropertyList[7]), float(finalPropertyList[8]), float(finalPropertyList[9]), float(finalPropertyList[10]))
-            newModel.setScale(float(finalPropertyList[11]))
-
+            newModel.setPos(float(finalPropertyList[1]), float(finalPropertyList[2]), 0)
+            newModel.setHpr(float(finalPropertyList[3]), 90, 0)
+            newModel.setScale(1)
 
         print(objectList)
         return
 
     def promptEngineered(self, textEntered):
         modelsAvailable = str(os.listdir("assets/furniture"))
-
-        prompt = "You will receive a description of a room. The response you provide will be used to load several 3D models into a 3D cartesian space. You must provide a list of models that would be loaded, alongside several properties such as color, size, position (z up, also bounds are 20 units), and rotation (heading, pitch, roll). The files available are: " + modelsAvailable + ". Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please provide a in the following format: [{filename} {posX} {posY} {posZ} {heading} {pitch}, {roll} {color_red - 0 to 1} {color_blue - 0 to 1} {color_green - 0 to 1} {color_alpha - 0 to 1} {scale}], each object in its own line. INCLUDE THE FILE EXTENSION IN FILENAME TOO. So for example, ({books.glb}{0}{0}{0}{90}{20}{0}{1}{0}{0.5}{0.4}{1}). Please ensure that walls and floorings are also specified,  The input is as follows: "
+        print(modelsAvailable)
+        prompt = "you will receive a description of a room. Using only the models available, you must provide a list of models that would be loaded, alongside several properties such position, and heading. The files available are. USE THOSE ONLY, DO NOT MAKE UP ANY FILE: " + modelsAvailable + ". Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb nor is there a tablelamp SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please provide a in the following format: [{filename} {posX values between -5 to 5} {posY - values between -5 to 5}{posY - values between 0 to 10} {heading}], each object in its own line. INCLUDE THE FILE EXTENSION IN FILENAME TOO. So for example, ({books.glb}{0}{0}{90}). AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES, doorways must either have a x value of 0 or y value of 0,  The input is as follows: "
         response = self.model.generate_content(prompt + textEntered)
         #print(response.text)
 
