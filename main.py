@@ -65,28 +65,53 @@ class MyApp(ShowBase):
 
     def designRoom(self, textEntered):
         print(textEntered)
-        self.assetsLoaded = []
-        response = self.promptEngineered(textEntered)
-        objectList = response.split("\n")
-        print(objectList)
-        for obj in range(0, len(objectList)):
-            objectList[obj] = objectList[obj].replace("{", "").split("}")
-            objectList[obj].pop()
-            finalPropertyList = objectList[obj]
-            newModel = loader.loadModel("assets/furniture/" + objectList[obj][0])
-            self.assetsLoaded.append(newModel)
-            newModel.reparentTo(render)
-            newModel.setPos(float(finalPropertyList[1]), float(finalPropertyList[2]), 0)
-            newModel.setHpr(float(finalPropertyList[3]), 90, 0)
-            newModel.setScale(1)
+        for object in self.assetsLoaded:
+            object.removeNode()
+        again = True
+        while again:
+            again = False
+            try:
+                response = self.promptEngineered(textEntered)
+                objectList = response.split("\n")
+                print(objectList)
+                for obj in range(0, len(objectList)):
+                    objectList[obj] = objectList[obj].replace("{", "").split("}")
+                    objectList[obj].pop()
+                    finalPropertyList = objectList[obj]
+                    newModel = loader.loadModel("assets/furniture/" + objectList[obj][0])
+                    self.assetsLoaded.append(newModel)
+                    newModel.reparentTo(render)
+                    if len(finalPropertyList) == 4:
+                        newModel.setPos(float(finalPropertyList[1]), float(finalPropertyList[2]), 0)
+                        newModel.setHpr(float(finalPropertyList[3]), 90, 0)
+                        newModel.setScale(1)
+                    else:
+                        newModel.setX(float(finalPropertyList[1]), self.assetsLoaded[-2])
+                        newModel.setHpr(float(finalPropertyList[2]), 90, 0)
+                    newModel.setScale(1)
 
-        print(objectList)
+                print(objectList)
+            except:
+                print("Tried to load missing model")
+                again = True
         return
 
     def promptEngineered(self, textEntered):
         modelsAvailable = str(os.listdir("assets/furniture"))
         print(modelsAvailable)
-        prompt = "you will receive a description of a room. Using only the models available, you must provide a list of models that would be loaded, alongside several properties such position, and heading. The files available are. USE THOSE ONLY, DO NOT MAKE UP ANY FILE: " + modelsAvailable + ". Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb nor is there a tablelamp SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please provide a in the following format: [{filename} {posX values between -5 to 5} {posY - values between -5 to 5}{posY - values between 0 to 10} {heading}], each object in its own line. INCLUDE THE FILE EXTENSION IN FILENAME TOO. So for example, ({books.glb}{0}{0}{90}). AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES, doorways must either have a x value of 0 or y value of 0,  The input is as follows: "
+        prompt = '''
+This is an app that will take an input from the user and, using the models available, generate a room. The response you provide will be used to load several models into a 3D space, use only the files listed, nothing else, do not make up files. The files available are. USE THOSE ONLY, DO NOT MAKE UP ANY FILE: ''' + modelsAvailable + '''. Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb nor is there a tablelamp SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please provide in the following format:
+{filename} {posX} {posY} {heading}] OR {filename} {relativePos} {heading}, each object in its own line. INCLUDE THE FILE .glb EXTENSION IN FILENAME TOO. So for example, {books.glb}{0}{0}{90}. 
+
+{filename} - the name of the file, for example “{char.glb}”
+{posX} - a value between -10 and 10. 
+{posY} - a value between -10 and 10.
+{heading} - a value between 0 and 360
+{relativePos} - linear distance relative to previous object between -5 and 5, so or example {3} would mean 3 spaces in front of the last object added.
+All values between curly brackets
+FOR DOORWAYS, POS X MUST EITHER BE -10 OR 10 OR POS Y MUST BE -10 OR 10
+AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES. The input is as follows:
+'''
         response = self.model.generate_content(prompt + textEntered)
         #print(response.text)
 
