@@ -19,7 +19,9 @@ class MyApp(ShowBase):
             self.model = loader.loadModel(f"assets/furniture/{model}")
             bounds = self.model.getTightBounds()
             size = bounds[1] - bounds[0]
-            self.sizes[model] = size
+            twoDimensionalSize = Vec2(size.getX(), size.getY())
+            scalesize = int(size.length() + 1)
+            self.sizes[model] = scalesize
         with open("sizes.txt", 'w') as file:
             file.write(str(self.sizes))
         file.close()

@@ -91,28 +91,31 @@ class MyApp(ShowBase):
                     newModel.setScale(1)
 
                 print(objectList)
-            except:
-                print("Tried to load missing model")
+            except Exception as error:
+                print(error)
                 again = True
         return
 
     def promptEngineered(self, textEntered):
         modelsAvailable = open("sizes.txt", 'r').read()
+
+        firstStage = self.model.generate_content("Imagine you're playing with legos and have a 10x10 grid to work with, and you have the following bricks - each brick is a square and it's side length is noted along with the name: " + modelsAvailable + " - list out all the coordinates of where you'd place the furniture, no overlapping is allowed, bottom left coordinate is (-5,-5): " + textEntered)
+        print("First stage text")
+        print(firstStage.text)
         print(modelsAvailable)
         prompt = '''
 This is an app that will take an input from the user and, using the models available, generate a room. The response you provide will be used to load several models into a 3D space, use only the files listed, nothing else, do not make up files. Use only the files available, and those are as follows (also keep note of the sizes when setting out the room, they're provided as a Vec3 format): ''' + modelsAvailable + '''. Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb nor is there a tablelamp SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please provide in the following format:
-{filename} {posX} {posY} {heading}] OR {filename} {relativePos} {heading}, each object in its own line. INCLUDE THE FILE .glb EXTENSION IN FILENAME TOO. So for example, {books.glb}{0}{0}{90}. 
+{filename} {posX} {posY} {heading}], each object in its own line. INCLUDE THE FILE .glb EXTENSION IN FILENAME TOO. So for example, {books.glb} {0} {0} {90}. 
 
 {filename} - the name of the file, for example “{char.glb}”
 {posX} - a value between -5 and 5. 
 {posY} - a value between -5 and 5.
+All values must be between curly brackets
 {heading} - a value between 0 and 360 - the direction the object is facing. Keep in mind that all objects are facing the negative y axis when H (heading) is equal to 0.
-{relativePos} - linear distance relative to previous object between -5 and 5, so or example {3} would mean 3 spaces in front of the last object added.
-All values between curly brackets
 FOR DOORWAYS, POS X MUST EITHER BE -5 OR 5 OR POS Y MUST BE -5 OR 5
-AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES. DO NOT INSTANTIATE MORE THAN 30 OBJECTS. The input is as follows:
-'''
-        response = self.model.generate_content(prompt + textEntered)
+AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES. DO NOT LIST MORE THAN 10 OBJECTS, and make sure to not have two models in the same place, YOU MAY ONLY USE THE FOLLOWING FILES: ''' + modelsAvailable + "The input is as follows:"
+
+        response = self.model.generate_content(prompt + firstStage.text)
         #print(response.text)
 
         return response.text
