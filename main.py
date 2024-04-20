@@ -48,7 +48,7 @@ class MyApp(ShowBase):
         self.accept("l-up", self.updateKey, ["l", False])
 
         self.entrybox = DirectEntry(text="", scale=0.05, command=self.designRoom,
-                            initialText="TV facing a sofa", numLines=30, width = 15,cursorKeys = 1, focus=1
+                            initialText="TV and sofa facing each other", numLines=30, width = 15,cursorKeys = 1, focus=1
                                     , parent=base.a2dTopLeft, pos=(0.01, 0, -0.3), text_fg = (1,1,1,1))
         self.entrybox.setColor(0.1,0.1,0.1,0.7)
         self.entrybox.set
@@ -81,14 +81,9 @@ class MyApp(ShowBase):
                     newModel = loader.loadModel("assets/furniture/" + objectList[obj][0])
                     self.assetsLoaded.append(newModel)
                     newModel.reparentTo(render)
-                    if len(finalPropertyList) == 4:
-                        newModel.setPos(float(finalPropertyList[1]), float(finalPropertyList[2]), 0)
-                        newModel.setHpr(float(finalPropertyList[3]), 90, 0)
-                        newModel.setScale(1)
-                    else:
-                        newModel.setX(float(finalPropertyList[1]), self.assetsLoaded[-2])
-                        newModel.setHpr(float(finalPropertyList[2]), 90, 0)
-                    newModel.setScale(1)
+                    newModel.setPos(float(finalPropertyList[1]), float(finalPropertyList[2]), 0)
+                    newModel.setHpr(float(finalPropertyList[3])-180, 90, 0)
+                    #newModel.setScale(1)
 
                 print(objectList)
             except Exception as error:
@@ -99,20 +94,19 @@ class MyApp(ShowBase):
     def promptEngineered(self, textEntered):
         modelsAvailable = open("sizes.txt", 'r').read()
 
-        firstStage = self.model.generate_content("Imagine you're playing with legos and have a 10x10 grid to work with, and you have the following bricks - each brick is a square and it's side length is noted along with the name: " + modelsAvailable + " - list out all the coordinates of where you'd place the furniture, no overlapping is allowed, bottom left coordinate is (-5,-5): " + textEntered)
+        firstStage = self.model.generate_content("Imagine you're playing with legos and have a 10x10 grid to work with, and you have the following bricks - each brick is a square and its side length is noted along with the name: " + modelsAvailable + " - list out all the coordinates and direction of where you'd place the furniture (no need to use all of them, just ones you'd need for the description that will follow this) as well as the direction in heading (up to 360, an object pointing at 0 points at the negative y axis), no overlapping is allowed, bottom left coordinate is (-5,-5), PLEASE CONSIDER THE NECESSITY OF USING EACH BRICK, FOR EXAMPLE THERE IS NO BED IN A STANDARD CLASSROOM OR LIVING ROOM, the prompt is as follows: " + textEntered)
         print("First stage text")
         print(firstStage.text)
         print(modelsAvailable)
         prompt = '''
-This is an app that will take an input from the user and, using the models available, generate a room. The response you provide will be used to load several models into a 3D space, use only the files listed, nothing else, do not make up files. Use only the files available, and those are as follows (also keep note of the sizes when setting out the room, they're provided as a Vec3 format): ''' + modelsAvailable + '''. Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb nor is there a tablelamp SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please provide in the following format:
+Using only the following files: ''' + modelsAvailable + '''. Use these exact filenames ONLY and MAKE SURE THEY EXIST, there is no sofa.glb nor is there a tablelamp.glb SO DO NOT USE IT BECAUSE IT DOESN'T EXIST. Please turn the following input in to the following format:
 {filename} {posX} {posY} {heading}], each object in its own line. INCLUDE THE FILE .glb EXTENSION IN FILENAME TOO. So for example, {books.glb} {0} {0} {90}. 
 
 {filename} - the name of the file, for example “{char.glb}”
 {posX} - a value between -5 and 5. 
 {posY} - a value between -5 and 5.
 All values must be between curly brackets
-{heading} - a value between 0 and 360 - the direction the object is facing. Keep in mind that all objects are facing the negative y axis when H (heading) is equal to 0.
-FOR DOORWAYS, POS X MUST EITHER BE -5 OR 5 OR POS Y MUST BE -5 OR 5
+{heading} - a value between 0 and 360 - the direction the object is facing. Keep in mind that all objects are facing the negative y axis when H (heading) is equal to {0}, make sure the direction they're facing makes contextual sense.
 AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES. DO NOT LIST MORE THAN 10 OBJECTS, and make sure to not have two models in the same place, YOU MAY ONLY USE THE FOLLOWING FILES: ''' + modelsAvailable + "The input is as follows:"
 
         response = self.model.generate_content(prompt + firstStage.text)
