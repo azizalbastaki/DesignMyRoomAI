@@ -51,12 +51,39 @@ class MyApp(ShowBase):
                             initialText="TV and sofa facing each other", numLines=30, width = 15,cursorKeys = 1, focus=1
                                     , parent=base.a2dTopLeft, pos=(0.01, 0, -0.3), text_fg = (1,1,1,1))
         self.entrybox.setColor(0.1,0.1,0.1,0.7)
-        self.entrybox.set
         dlight = DirectionalLight('dlight')
         dlight.setColor((0.8, 0.8, 0.5, 1))
         dlnp = render.attachNewNode(dlight)
         dlnp.setHpr(0, -60, 0)
         render.setLight(dlnp)
+        # add floor and 4 walls
+        floor = loader.loadModel("assets/environment/floorFull.glb")
+        floor.reparentTo(render)
+        floor.setPos(-5, -5, 0)
+        floor.setScale(10)
+        floor.setSy(0.01)
+        floor.setHpr(0, 90, 0)
+        # wall1 = loader.loadModel("assets/environment/wall.glb")
+        # wall1.reparentTo(render)
+        # wall1.setPos(5, 5, 0)
+        # wall1.setScale(10)
+        # wall1.setHpr(0, 90, 0)
+        # wall2 = loader.loadModel("assets/environment/wall.glb")
+        # wall2.reparentTo(render)
+        # wall2.setPos(5, -5, 0)
+        # wall2.setScale(10)
+        # wall2.setHpr(0, 90, 0)
+        # wall3 = loader.loadModel("assets/environment/wall.glb")
+        # wall3.reparentTo(render)
+        # wall3.setPos(-5, 5, 0)
+        # wall3.setScale(10)
+        # #wall3.setHpr(0, 90, 0)
+        # wall4 = loader.loadModel("assets/environment/wall.glb")
+        # wall4.reparentTo(render)
+        # wall4.setPos(5, 5, 0)
+        # wall4.setScale(10)
+        # #wall4.setHpr(0, 90, 0)
+
         self.taskMgr.add(self.update, "update")
     def updateKey(self, key, value):
         self.keyMap[key] = value
@@ -94,7 +121,11 @@ class MyApp(ShowBase):
     def promptEngineered(self, textEntered):
         modelsAvailable = open("sizes.txt", 'r').read()
 
-        firstStage = self.model.generate_content("Imagine you're playing with legos and have a 10x10 grid to work with, and you have the following bricks - each brick is a square and its side length is noted along with the name: " + modelsAvailable + " - list out all the coordinates and direction of where you'd place the furniture (no need to use all of them, just ones you'd need for the description that will follow this) as well as the direction in heading (up to 360, an object pointing at 0 points at the negative y axis), no overlapping is allowed, bottom left coordinate is (-5,-5), PLEASE CONSIDER THE NECESSITY OF USING EACH BRICK, FOR EXAMPLE THERE IS NO BED IN A STANDARD CLASSROOM OR LIVING ROOM, the prompt is as follows: " + textEntered)
+        firstStage = self.model.generate_content("Imagine you're playing with legos and have a 10x10 grid to work with, and you have the following bricks - each brick is a square and its side length is noted along with the name: " + modelsAvailable + " - list out all the coordinates and direction of where you'd place the furniture (no need to use all of them, just ones you'd need for the description that will follow this) as well as the direction in heading (up to 360, an object pointing at 0 points at the negative y axis)" + ''', 
+        so for example, if the prompt was TV and sofa facing each other, the answer should be: 
+        - televisionModern.glb: (0, 1), 180 degrees
+        - loungeSofa.glb: (0, -1), 0 degrees
+        no overlapping is allowed (SO NO TWO OBJECTS SHARE THE SAME COORDINATE), bottom left coordinate is (-5,-5), PLEASE CONSIDER THE NECESSITY OF USING EACH BRICK, FOR EXAMPLE THERE IS NO BED IN A STANDARD CLASSROOM OR LIVING ROOM, the prompt is as follows: ''' + textEntered)
         print("First stage text")
         print(firstStage.text)
         print(modelsAvailable)
@@ -107,7 +138,7 @@ Using only the following files: ''' + modelsAvailable + '''. Use these exact fil
 {posY} - a value between -5 and 5.
 All values must be between curly brackets
 {heading} - a value between 0 and 360 - the direction the object is facing. Keep in mind that all objects are facing the negative y axis when H (heading) is equal to {0}, make sure the direction they're facing makes contextual sense.
-AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES. DO NOT LIST MORE THAN 10 OBJECTS, and make sure to not have two models in the same place, YOU MAY ONLY USE THE FOLLOWING FILES: ''' + modelsAvailable + "The input is as follows:"
+AND DO NOT PROVIDE VALUES OUTSIDE GIVEN RANGES. DO NOT LIST MORE THAN 10 OBJECTS, NO TWO MODELS MAY SHARE THE SAME COORDINATE, YOU MAY ONLY USE THE FOLLOWING FILES: ''' + modelsAvailable + "The input is as follows: "
 
         response = self.model.generate_content(prompt + firstStage.text)
         #print(response.text)
