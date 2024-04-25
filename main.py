@@ -50,44 +50,54 @@ class MyApp(ShowBase):
         self.entrybox = DirectEntry(text="", scale=0.05, command=self.designRoom,
                             initialText="TV and sofa facing each other", numLines=30, width = 15,cursorKeys = 1, focus=1
                                     , parent=base.a2dTopLeft, pos=(0.01, 0, -0.3), text_fg = (1,1,1,1))
+        self.showingPromptBox = True
+
+        self.textObject = OnscreenText(text="DesignMyRoom AI. Abdulaziz Albastaki 2024. Press SPACE to show/hide prompt box.", pos=(0.01, -0.96), scale=0.05, fg=(1, 1, 1, 1))
+
         self.entrybox.setColor(0.1,0.1,0.1,0.7)
         dlight = DirectionalLight('dlight')
         dlight.setColor((0.8, 0.8, 0.5, 1))
         dlnp = render.attachNewNode(dlight)
         dlnp.setHpr(0, -60, 0)
         render.setLight(dlnp)
-        # add floor and 4 walls
         floor = loader.loadModel("assets/environment/floorFull.glb")
         floor.reparentTo(render)
         floor.setPos(-5, -5, 0)
         floor.setScale(10)
         floor.setSy(0.01)
         floor.setHpr(0, 90, 0)
-        # wall1 = loader.loadModel("assets/environment/wall.glb")
-        # wall1.reparentTo(render)
-        # wall1.setPos(5, 5, 0)
-        # wall1.setScale(10)
-        # wall1.setHpr(0, 90, 0)
-        # wall2 = loader.loadModel("assets/environment/wall.glb")
-        # wall2.reparentTo(render)
-        # wall2.setPos(5, -5, 0)
-        # wall2.setScale(10)
-        # wall2.setHpr(0, 90, 0)
-        # wall3 = loader.loadModel("assets/environment/wall.glb")
-        # wall3.reparentTo(render)
-        # wall3.setPos(-5, 5, 0)
-        # wall3.setScale(10)
-        # #wall3.setHpr(0, 90, 0)
-        # wall4 = loader.loadModel("assets/environment/wall.glb")
-        # wall4.reparentTo(render)
-        # wall4.setPos(5, 5, 0)
-        # wall4.setScale(10)
-        # #wall4.setHpr(0, 90, 0)
+        wall1 = loader.loadModel("assets/environment/wall.glb")
+        wall1.reparentTo(render)
+        wall1.setPos(-5, 5, 0)
+        wall1.setScale(10)
+        wall1.setSy(1)
+        wall1.setHpr(0, 90, 0)
+        wall2 = loader.loadModel("assets/environment/wall.glb")
+        wall2.reparentTo(render)
+        wall2.setPos(-5, -5, 0)
+        wall2.setScale(10)
+        wall2.setSy(1)
+        wall2.setHpr(0, 90, 0)
+        wall3 = loader.loadModel("assets/environment/wall.glb")
+        wall3.reparentTo(render)
+        wall3.setPos(5, -5, 0)
+        wall3.setScale(10)
+        wall3.setSy(1)
+        wall3.setHpr(90, 90, 0)
+        wall4 = loader.loadModel("assets/environment/wall.glb")
+        wall4.reparentTo(render)
+        wall4.setPos(-5, -5, 0)
+        wall4.setScale(10)
+        wall4.setSy(1)
+        wall4.setHpr(90, 90, 0)
+
+
 
         self.taskMgr.add(self.update, "update")
     def updateKey(self, key, value):
         self.keyMap[key] = value
     def update(self, task):
+        # toggle showpromptbox when P is pressed
         return task.cont
 
     def designRoom(self, textEntered):
