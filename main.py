@@ -22,7 +22,7 @@ class MyApp(ShowBase):
                                     , parent=base.a2dTopLeft, pos=(0.01, 0, -0.3), text_fg = (1,1,1,1))
         self.showingPromptBox = True
 
-        self.textObject = OnscreenText(text="DesignMyRoom AI, Google AI Hackathon Entry. Credit to www.kenny.nl for 3D assets. Abdulaziz Albastaki 2024. ", pos=(0.01, -0.96), scale=0.05, fg=(1, 1, 1, 1))
+        self.textObject = OnscreenText(text="DesignMyRoom AI, Google AI Hackathon Entry. Credit to www.kenney.nl for 3D assets. Abdulaziz Albastaki 2024. ", pos=(0.01, -0.96), scale=0.05, fg=(1, 1, 1, 1))
 
         self.entrybox.setColor(0.1,0.1,0.1,0.7)
         dlight = DirectionalLight('dlight')
